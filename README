@@ -1,0 +1,56 @@
+# DISCLAIMER OF WARRANTIES AND LIMITATION OF LIABILITY 
+# The software is supplied "as is" and all use is at your own risk.  Peak Performance Systems disclaims 
+# all warranties of any kind, either express or implied, as to the software, including, but not limited to, 
+# implied warranties of fitness for a particular purpose, merchantability or non - infringement of proprietary 
+# rights.  Neither this agreement nor any documentation furnished under it is intended to express or imply 
+# any warranty that the operation of the software will be uninterrupted, timely, or error - free.  Under no 
+# circumstances shall Peak Performance Systems be liable to any user for direct, indirect, incidental, 
+# consequential, special, or exemplary damages, arising from or relating to this agreement, the software, or 
+# user#s use or misuse of the softwares.  Such limitation of liability shall apply whether the damages arise 
+# from the use or misuse of the software (including such damages incurred by third parties), or errors of 
+# the software.  
+
+INTRO
+-----
+Mysql SLOB is ported from SLOB(Silly Little Oracle Benchmark) tools, published by Kevin Closson. See below page for the introduction of SLOB.
+http://kevinclosson.net/2012/02/06/introducing-slob-the-silly-little-oracle-benchmark/
+Mysql SLOB is rewriten for mysql benchmark.
+
+USAGE
+-----
+1. Setup n schema for benchmark
+sh ./setup.sh <number of users>
+
+2. Start n session to run the workload
+sh ./runit.sh <number of sessions to execute>
+
+Configuration
+-------------
+The Parameters in slob.conf are self-explained as below
+
+UPDATE_PCT=25                   -- The ratio of updates 
+RUN_TIME=300                    -- The Run Time
+WORK_LOOP=0                     -- The max loop iteration
+SCALE=10000                     -- The number of rows to be populate when setup the schemas
+WORK_UNIT=64                    -- The number of rows to be selected or updated
+REDO_STRESS=HEAVY               -- Update few or many columns
+LOAD_PARALLEL_DEGREE=4          -- The number of parallel process to setup the schemas
+
+# Password of Mysql Root Account
+MYSQL_ROOT_PWD=password         -- *Mandatory*: the root password
+
+#### Mysql Connection Settings:
+MYSQL_HOST=                     -- The remote Mysql host name
+MYSQL_PORT=                     -- The none-default Mysql port number 
+
+# The datafile path for the benchmark tables, supported since MySQL 5.6.6
+INNODB_DATA_PATH=""             -- The none-default innodb datafile path
+
+#### Advanced settings:
+SHARED_DATA_MODULUS=0           -- If each session do selects/updates on the same schema user1 every n loop iteration
+DO_UPDATE_HOTSPOT=FALSE         -- If each session do updates on the same schema user1 every n loop iteration
+HOTSPOT_PCT=10                  -- Hotspot data percent
+
+THINK_TM_MODULUS=0              -- Go to sleep every n loop iteration
+THINK_TM_MIN=.1                 -- Min sleep time
+THINK_TM_MAX=.5                 -- Max sleep time
