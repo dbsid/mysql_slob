@@ -102,7 +102,7 @@ SELECT concat(table_schema,'.',table_name) "schema.table_name",
     concat(round((data_length+index_length)/(1024*1024*1024),2),'G') total_size,
     round(index_length/data_length,2) idxfrac 
 FROM information_schema.TABLES 
-WHERE table_name = 'CF1'
+WHERE table_name = 'cf1'
 ORDER BY table_schema;
 
 EOF
@@ -118,8 +118,8 @@ local x=1
 
 for (( x=1 ; x < 4096 ; x++ ))
 do
-        echo "DROP DATABASE User${x};" >> drop_databases_users.sql
-        echo "DROP USER user${x}@localhost;" >> drop_databases_users.sql
+        echo "DROP DATABASE user${x};" >> drop_databases_users.sql
+        echo "DROP USER user${x}@'localhost', user${x}@'%';" >> drop_databases_users.sql
 done
 
 mysql $constring -vvv < drop_databases_users.sql 2>&1 | tee -a /tmp/XX |  grep -i "Query OK" | wc -l  | while read num_processed
@@ -139,12 +139,14 @@ local ret=0
 mysql $constring -vvv <<EOF
 create database ${user};
 grant all privileges on ${user}.* to ${user}@'localhost' identified by '${user}' with grant option;
+grant all privileges on ${user}.* to ${user}@'%' identified by '${user}' with grant option;
 EOF
 
 if [ "$user" != "user1" ]
 then
 mysql $constring -vvv <<EOF
     grant all privileges on user1.* to ${user}@'localhost';
+    grant all privileges on user1.* to ${user}@'%';
 EOF
 
 fi
@@ -186,8 +188,6 @@ DELIMITER ;
 
 call load_base_table_data();
 
-CREATE UNIQUE INDEX I_CF1 ON cf1(custid);
-
 EOF
 
 ret=$?
@@ -203,11 +203,9 @@ local ret=0
 mysql -u${user} -p${pass} ${NON_ADMIN_CONNECT_STRING} -vvv <<EOF
 use ${user};
 
-INSERT INTO CF1 select * from USER1.CF1;
+INSERT INTO cf1 select * from user1.cf1;
 
 COMMIT;
-
-CREATE UNIQUE INDEX I_CF1 ON cf1(custid);
 
 EOF
 ret=$?
@@ -231,7 +229,7 @@ use ${user};
 
 CREATE TABLE cf1
 (
-custid int , c2 VARCHAR(128), c3 VARCHAR(128) , 
+custid int primary key, c2 VARCHAR(128), c3 VARCHAR(128) , 
 c4 VARCHAR(128) , c5 VARCHAR(128) , c6 VARCHAR(128) ,
 c7 VARCHAR(128) , c8 VARCHAR(128) , c9 VARCHAR(128) ,
 c10 VARCHAR(128) , c11 VARCHAR(128) , c12 VARCHAR(128) ,

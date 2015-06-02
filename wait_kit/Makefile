@@ -9,6 +9,7 @@ create_sem:	create_sem.o
 	cc -o create_sem create_sem.o
 install:
 	cp mywait trigger create_sem ../
+	cp mywait trigger create_sem ../misc
 clean:
 	rm -fr *.o mywait trigger create_sem 
 clean_again:

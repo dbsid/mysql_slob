@@ -186,7 +186,7 @@ then
 	exit 1
 fi
 
-rm -f  iostat.out vmstat.out mpstat.out slob_debug.out *_slob.pids.out
+rm -f  iostat.out vmstat.out mpstat.out slob_debug.out mystat.out *_slob.pids.out
 
 # Just in case user deleted lines in slob.conf:
 UPDATE_PCT=${UPDATE_PCT:=25}
@@ -237,6 +237,15 @@ fi
 export admin_connect_string="-uroot -p${MYSQL_ROOT_PWD} ${conn_string}"
 export non_admin_connect_string="${conn_string}"
 
+if [ ! -f ./misc/mystat_slob.pl ]
+then
+	msg WARNING "No mystat_slob.pl file in ./misc."
+	MYSTAT_SLOB=FALSE
+	return 1
+else
+	MYSTAT_SLOB=TRUE
+fi
+
 # The following is the first screen output
 msg NOTIFY " "
 msg NOTIFY "Conducting SLOB pre-test checks."
@@ -247,6 +256,7 @@ RUN_TIME == $RUN_TIME
 WORK_LOOP == $WORK_LOOP
 SCALE == $SCALE
 WORK_UNIT == $WORK_UNIT
+REDO_STRESS == $REDO_STRESS
 admin_connect_string == \"$admin_connect_string\"
 non_admin_connect_string == \"$non_admin_connect_string\"
 "
@@ -313,6 +323,13 @@ do
 	[[ $x -eq 0 ]] && sleep 1
 done
 
+if [ "$MYSTAT_SLOB" = "TRUE" ]
+then
+	cd misc
+	./create_sem > /dev/null 2>&1
+	perl ./mystat_slob.pl -i 60 -n all -h 127.0.0.1 -u user1 -p user1 > ../mystat.out 2>/tmp/mystat_debug.out &
+	cd ..
+fi
 msg NOTIFY " "
 
 if [[  $(( cnt / 6 )) -gt 5 ]]
@@ -345,12 +362,17 @@ then
 	exit 1
 fi
 
-wait
-
 (( tm =  $SECONDS - $before ))
 
 msg NOTIFY "Run time in seconds was:  $tm" >&2
 echo "Tm $tm" > tm.out
+
+if [ "$MYSTAT_SLOB" = "TRUE" ]
+then
+	cd misc
+	./trigger > /dev/null 2>&1
+	cd ..
+fi
 
 sleep 1
 

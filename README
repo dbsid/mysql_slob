@@ -54,3 +54,9 @@ HOTSPOT_PCT=10                  -- Hotspot data percent
 THINK_TM_MODULUS=0              -- Go to sleep every n loop iteration
 THINK_TM_MIN=.1                 -- Min sleep time
 THINK_TM_MAX=.5                 -- Max sleep time
+
+About Mystat:
+-------------
+misc/mysql_slob.pl will capture the activity statistics, need to install below perl modules, better by cpan.
+
+cpan[1]> install Switch DBD::mysql Getopt::Std Term::ANSIColor strict DBI
